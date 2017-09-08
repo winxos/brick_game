@@ -27,7 +27,8 @@ export class World {
         this.bodies.push(new Brick(this.w - wall_sz, 0, wall_sz, this.h, wall.fill_color));
         this.bodies.push(new Brick(wall_sz, 0, this.w - wall_sz * 2, wall_sz, wall.fill_color));
         this.bodies.push(new Brick(wall_sz, this.h - wall_sz, this.w - wall_sz * 2, wall_sz, wall.fill_color));
-
+        this.player = new Player(this.w / 2, this.h - 50, 200, 20);
+        this.bodies.push(this.player);
     }
 
     is_hit(a, b) {
@@ -36,12 +37,25 @@ export class World {
         }
         switch (a.shape.type) {
             case "RECT":
+                if (b.shape.type == "RECT") {
+                    if (a.x >= (b.x + b.w) || (a.x + a.w) <= b.x)
+                        return false;
+                    if (a.y >= ( b.y + b.h) || ( a.y + a.h) <= b.y)
+                        return false;
+
+                    if ((a.x < ( b.x + b.w ) && a.x > b.x) || ((a.x + a.w) > b.x && (a.x + a.w) < (b.x + b.w))) {
+                        a.x -= a.vx;
+                        a.vx = -a.vx;
+                        a.hit_checked = true;
+                    }
+                    return true;
+                }
                 break
             case "CIRCLE":
                 if (b.shape.type == "RECT") {
-                    if (a.x >= b.x - a.r && a.x <= b.x + b.w + a.r &&
-                        a.y >= b.y - a.r && a.y <= b.y + b.h + a.r) {
-                        if (a.x >= b.x && a.x <= b.x + b.w) {
+                    if (a.x >= ( b.x - a.r) && a.x <= (b.x + b.w + a.r) &&
+                        a.y >= (b.y - a.r) && a.y <= (b.y + b.h + a.r)) {
+                        if (a.x >= b.x && a.x <= (b.x + b.w)) {
                             a.y -= a.vy;
                             a.vy = -a.vy;
                         }
@@ -59,14 +73,8 @@ export class World {
 
     hit_check() {
         for (let i = 0; i < this.bodies.length; i++) {
-            if (!this.bodies[i].is_static) {
-                for (let j = i + 1; j < this.bodies.length; j++) {
-                    if (this.bodies[j].is_static) // only dynamic hit static
-                    {
-                        if (!this.bodies[i].hit_checked && this.is_hit(this.bodies[i], this.bodies[j])) {
-                            this.bodies[i].hit_checked = true;
-                        }
-                    }
+            for (let j = this.bodies.length-1; j >0 && j != i; j--) {
+                if (this.is_hit(this.bodies[i], this.bodies[j])) {
                 }
             }
         }

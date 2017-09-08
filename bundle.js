@@ -68,7 +68,7 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Shape__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Shape__ = __webpack_require__(4);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__Shape__["b"]; });
 
 
@@ -80,10 +80,19 @@ class Body {
         this.is_visiable = true;
         this.shape = new __WEBPACK_IMPORTED_MODULE_0__Shape__["a" /* Shape */]();
         this.hit_checked = false;
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.ax = 0;
+        this.ay = 0;
     }
 
     update() {
-
+        this.vx += this.ax;
+        this.vy += this.ay;
+        this.x += this.vx;
+        this.y += this.vy;
     };
 
     render() {
@@ -116,9 +125,9 @@ window.onload = function () {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Ball__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Brick__ = __webpack_require__(4);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Player__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__EventTrigger__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Brick__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Player__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__EventTrigger__ = __webpack_require__(7);
 
 
 
@@ -148,7 +157,8 @@ class World {
         this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](this.w - wall_sz, 0, wall_sz, this.h, wall.fill_color));
         this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, 0, this.w - wall_sz * 2, wall_sz, wall.fill_color));
         this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, this.h - wall_sz, this.w - wall_sz * 2, wall_sz, wall.fill_color));
-
+        this.player = new __WEBPACK_IMPORTED_MODULE_2__Player__["a" /* Player */](this.w / 2, this.h - 50, 200, 20);
+        this.bodies.push(this.player);
     }
 
     is_hit(a, b) {
@@ -157,12 +167,25 @@ class World {
         }
         switch (a.shape.type) {
             case "RECT":
+                if (b.shape.type == "RECT") {
+                    if (a.x >= (b.x + b.w) || (a.x + a.w) <= b.x)
+                        return false;
+                    if (a.y >= ( b.y + b.h) || ( a.y + a.h) <= b.y)
+                        return false;
+
+                    if ((a.x < ( b.x + b.w ) && a.x > b.x) || ((a.x + a.w) > b.x && (a.x + a.w) < (b.x + b.w))) {
+                        a.x -= a.vx;
+                        a.vx = -a.vx;
+                        a.hit_checked = true;
+                    }
+                    return true;
+                }
                 break
             case "CIRCLE":
                 if (b.shape.type == "RECT") {
-                    if (a.x >= b.x - a.r && a.x <= b.x + b.w + a.r &&
-                        a.y >= b.y - a.r && a.y <= b.y + b.h + a.r) {
-                        if (a.x >= b.x && a.x <= b.x + b.w) {
+                    if (a.x >= ( b.x - a.r) && a.x <= (b.x + b.w + a.r) &&
+                        a.y >= (b.y - a.r) && a.y <= (b.y + b.h + a.r)) {
+                        if (a.x >= b.x && a.x <= (b.x + b.w)) {
                             a.y -= a.vy;
                             a.vy = -a.vy;
                         }
@@ -180,14 +203,8 @@ class World {
 
     hit_check() {
         for (let i = 0; i < this.bodies.length; i++) {
-            if (!this.bodies[i].is_static) {
-                for (let j = i + 1; j < this.bodies.length; j++) {
-                    if (this.bodies[j].is_static) // only dynamic hit static
-                    {
-                        if (!this.bodies[i].hit_checked && this.is_hit(this.bodies[i], this.bodies[j])) {
-                            this.bodies[i].hit_checked = true;
-                        }
-                    }
+            for (let j = this.bodies.length-1; j >0 && j != i; j--) {
+                if (this.is_hit(this.bodies[i], this.bodies[j])) {
                 }
             }
         }
@@ -252,10 +269,7 @@ class Ball extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
     };
 
     update() {
-        this.vx += this.ax;
-        this.vy += this.ay;
-        this.x += this.vx;
-        this.y += this.vy;
+        super.update();
         this.left = this.x - this.r;
         this.right = this.x + this.r;
         this.top = this.y - this.r;
@@ -275,92 +289,6 @@ class Ball extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
 
 /***/ }),
 /* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
-
-
-class Brick extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
-    constructor(x, y, w = 40, h = 20, c = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")") {
-        super();
-        console.log(x, y);
-        this.x = x;
-        this.y = y;
-        this.w = w;
-        this.h = h;
-        this.fill_color = c;
-        this.shape = __WEBPACK_IMPORTED_MODULE_0__Body__["b" /* ShapeFactory */].create_rect(w, h);
-        this.is_static = true;
-    };
-
-    render(g) {
-        g.fillStyle = this.fill_color;
-        g.fillRect(this.x, this.y, this.w, this.h);
-    };
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Brick;
-
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
-
-
-class Player extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
-
-}
-/* unused harmony export Player */
-
-
-/***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class KeyCode {
-    static get left() {
-        return "37";
-    }
-
-    static get right() {
-        return "39";
-    }
-
-    static get up() {
-        return "38";
-    }
-
-    static get down() {
-        return "40";
-    }
-}
-/* unused harmony export KeyCode */
-
-
-class EventTrigger {
-    constructor() {
-        this.keyBuf = {};
-        addEventListener("keydown", (e) => {
-            this.keyBuf[e.keyCode] = true;
-        }, false);
-        addEventListener("keyup", (e) => {
-            this.keyBuf[e.keyCode] = false;
-        }, false);
-    }
-
-    is_keydown(k) {
-        return this.keyBuf[k] == true;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = EventTrigger;
-
-
-/***/ }),
-/* 7 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -400,6 +328,121 @@ class ShapeFactory {
 }
 /* harmony export (immutable) */ __webpack_exports__["b"] = ShapeFactory;
 ;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
+
+
+class Brick extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
+    constructor(x, y, w = 40, h = 20, c = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")") {
+        super();
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
+        this.fill_color = c;
+        this.shape = __WEBPACK_IMPORTED_MODULE_0__Body__["b" /* ShapeFactory */].create_rect(w, h);
+        this.is_static = true;
+    };
+
+    update() {
+        super.update();
+    }
+
+    render(g) {
+        g.fillStyle = this.fill_color;
+        g.fillRect(this.x, this.y, this.w, this.h);
+    };
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Brick;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Brick__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EventTrigger__ = __webpack_require__(7);
+
+
+
+class Player extends __WEBPACK_IMPORTED_MODULE_0__Brick__["a" /* Brick */] {
+    constructor(x, y, w, h) {
+        super(x, y, w, h);
+        this.is_static = false;
+        this.event = new __WEBPACK_IMPORTED_MODULE_1__EventTrigger__["a" /* EventTrigger */]();
+    }
+
+    update() {
+        super.update();
+        this.ax = 0;
+        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].left)) {
+            this.ax = -0.1;
+        }
+        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].right)) {
+            this.ax = 0.1;
+        }
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Player;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class KeyCode {
+    static get left() {
+        return "37";
+    }
+
+    static get right() {
+        return "39";
+    }
+
+    static get up() {
+        return "38";
+    }
+
+    static get down() {
+        return "40";
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = KeyCode;
+
+let __instance = (function () {
+    let instance;
+    return (newInstance) => {
+        if (newInstance) instance = newInstance;
+        return instance;
+    }
+}());
+
+class EventTrigger {
+    constructor() {
+        if (__instance()) return __instance();
+        this.keyBuf = {};
+        addEventListener("keydown", (e) => {
+            this.keyBuf[e.keyCode] = true;
+        }, false);
+        addEventListener("keyup", (e) => {
+            this.keyBuf[e.keyCode] = false;
+        }, false);
+        __instance(this);
+    }
+
+    is_keydown(k) {
+        return this.keyBuf[k] == true;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = EventTrigger;
+
 
 /***/ })
 /******/ ]);

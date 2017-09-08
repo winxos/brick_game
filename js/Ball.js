@@ -15,10 +15,7 @@ export class Ball extends Body {
     };
 
     update() {
-        this.vx += this.ax;
-        this.vy += this.ay;
-        this.x += this.vx;
-        this.y += this.vy;
+        super.update();
         this.left = this.x - this.r;
         this.right = this.x + this.r;
         this.top = this.y - this.r;

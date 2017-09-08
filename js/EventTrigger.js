@@ -15,9 +15,17 @@ export class KeyCode {
         return "40";
     }
 }
+let __instance = (function () {
+    let instance;
+    return (newInstance) => {
+        if (newInstance) instance = newInstance;
+        return instance;
+    }
+}());
 
 export class EventTrigger {
     constructor() {
+        if (__instance()) return __instance();
         this.keyBuf = {};
         addEventListener("keydown", (e) => {
             this.keyBuf[e.keyCode] = true;
@@ -25,6 +33,7 @@ export class EventTrigger {
         addEventListener("keyup", (e) => {
             this.keyBuf[e.keyCode] = false;
         }, false);
+        __instance(this);
     }
 
     is_keydown(k) {

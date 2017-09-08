@@ -3,7 +3,6 @@ import {Body, ShapeFactory} from "./Body"
 export class Brick extends Body {
     constructor(x, y, w = 40, h = 20, c = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")") {
         super();
-        console.log(x, y);
         this.x = x;
         this.y = y;
         this.w = w;
@@ -12,6 +11,10 @@ export class Brick extends Body {
         this.shape = ShapeFactory.create_rect(w, h);
         this.is_static = true;
     };
+
+    update() {
+        super.update();
+    }
 
     render(g) {
         g.fillStyle = this.fill_color;
