@@ -1,16 +1,20 @@
-import {Body} from "./Body"
-export class Brick extends Body{
-    constructor(x, y) {
+import {Body, ShapeFactory} from "./Body"
+
+export class Brick extends Body {
+    constructor(x, y, w = 40, h = 20, c = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")") {
         super();
+        console.log(x, y);
         this.x = x;
         this.y = y;
-        this.w = 40;
-        this.h = 20;
-        this.fill_color = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")";
-    }
+        this.w = w;
+        this.h = h;
+        this.fill_color = c;
+        this.shape = ShapeFactory.create_rect(w, h);
+        this.is_static = true;
+    };
 
     render(g) {
         g.fillStyle = this.fill_color;
         g.fillRect(this.x, this.y, this.w, this.h);
-    }
+    };
 }
