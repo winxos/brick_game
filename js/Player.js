@@ -12,10 +12,11 @@ export class Player extends Brick {
         super.update();
         this.ax = 0;
         if (this.event.is_keydown(KeyCode.left)) {
-            this.ax = -0.1;
+            this.ax = -0.3;
         }
         if (this.event.is_keydown(KeyCode.right)) {
-            this.ax = 0.1;
+            this.ax = 0.3;
         }
+        this.vx*=0.95;
     }
 }

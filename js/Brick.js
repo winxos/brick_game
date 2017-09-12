@@ -9,7 +9,6 @@ export class Brick extends Body {
         this.h = h;
         this.fill_color = c;
         this.shape = ShapeFactory.create_rect(w, h);
-        this.is_static = true;
     };
 
     update() {

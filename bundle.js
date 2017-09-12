@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 1);
+/******/ 	return __webpack_require__(__webpack_require__.s = 3);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -68,7 +68,7 @@
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Shape__ = __webpack_require__(4);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Shape__ = __webpack_require__(6);
 /* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__Shape__["b"]; });
 
 
@@ -106,234 +106,6 @@ class Body {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__World__ = __webpack_require__(2);
-
-
-window.onload = function () {
-    let c = window.document.getElementById("c");
-    let h = 500, w = 1000;
-    c.setAttribute('width', w);
-    c.setAttribute('height', h);
-    let world = new __WEBPACK_IMPORTED_MODULE_0__World__["a" /* World */](c);
-    world.run();
-}
-
-/***/ }),
-/* 2 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Ball__ = __webpack_require__(3);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Brick__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Player__ = __webpack_require__(6);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__EventTrigger__ = __webpack_require__(7);
-
-
-
-
-
-class World {
-    constructor(canvas) {
-        this.canvas = canvas;
-        this.w = this.canvas.width;
-        this.h = this.canvas.height;
-        this.g = this.canvas.getContext("2d");
-        this.event = new __WEBPACK_IMPORTED_MODULE_3__EventTrigger__["a" /* EventTrigger */]();
-        this.bc = document.createElement('canvas');
-        this.bc.width = this.w;
-        this.bc.height = this.h;
-        this.bg = this.bc.getContext("2d");
-        this.bodies = Array();
-        for (let i = 0; i < 10; i++) {
-            this.bodies.push(new __WEBPACK_IMPORTED_MODULE_0__Ball__["a" /* Ball */](this.w * Math.random() * 0.8 + 50,
-                this.h * Math.random() * 0.8 + 50,
-                6 * Math.random() - 2, 6 * Math.random() - 2, 16 * Math.random() + 12));
-        }
-        let wall_sz = 20;
-        let wall = new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](0, 0, wall_sz, this.h);
-        console.log(wall.fill_color);
-        this.bodies.push(wall);
-        this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](this.w - wall_sz, 0, wall_sz, this.h, wall.fill_color));
-        this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, 0, this.w - wall_sz * 2, wall_sz, wall.fill_color));
-        this.bodies.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, this.h - wall_sz, this.w - wall_sz * 2, wall_sz, wall.fill_color));
-        this.player = new __WEBPACK_IMPORTED_MODULE_2__Player__["a" /* Player */](this.w / 2, this.h - 50, 200, 20);
-        this.bodies.push(this.player);
-    }
-
-    is_hit(a, b) {
-        if (a.shape.type == null || b.shape.type == null) {
-            return false
-        }
-        switch (a.shape.type) {
-            case "RECT":
-                if (b.shape.type == "RECT") {
-                    if (a.x >= (b.x + b.w) || (a.x + a.w) <= b.x)
-                        return false;
-                    if (a.y >= ( b.y + b.h) || ( a.y + a.h) <= b.y)
-                        return false;
-
-                    if ((a.x < ( b.x + b.w ) && a.x > b.x) || ((a.x + a.w) > b.x && (a.x + a.w) < (b.x + b.w))) {
-                        a.x -= a.vx;
-                        a.vx = -a.vx;
-                        a.hit_checked = true;
-                    }
-                    return true;
-                }
-                break
-            case "CIRCLE":
-                if (b.shape.type == "RECT") {
-                    if (a.x >= ( b.x - a.r) && a.x <= (b.x + b.w + a.r) &&
-                        a.y >= (b.y - a.r) && a.y <= (b.y + b.h + a.r)) {
-                        if (a.x >= b.x && a.x <= (b.x + b.w)) {
-                            a.y -= a.vy;
-                            a.vy = -a.vy;
-                        }
-                        else {
-                            a.x -= a.vx;
-                            a.vx = -a.vx;
-                        }
-                        return true;
-                    }
-                }
-                break
-        }
-        return false;
-    };
-
-    hit_check() {
-        for (let i = 0; i < this.bodies.length; i++) {
-            for (let j = this.bodies.length-1; j >0 && j != i; j--) {
-                if (this.is_hit(this.bodies[i], this.bodies[j])) {
-                }
-            }
-        }
-    }
-
-    update() {
-        for (var b of this.bodies) {
-            b.update();
-            b.hit_checked = false;
-        }
-        this.hit_check();
-    }
-
-    draw_bg() {
-        this.g.fillStyle = "green";
-        this.g.fillText("KeyPress", this.w - 150, this.h - 50);
-        this.g.fillText("←", this.w - 100, this.h - 100);
-        this.g.fillText("↑", this.w - 80, this.h - 120);
-        this.g.fillText("→", this.w - 65, this.h - 100);
-        this.g.fillText("↓", this.w - 80, this.h - 80);
-    }
-
-    render() {
-        this.draw_bg();
-        for (var b of this.bodies) {
-            b.render(this.g);
-        }
-    }
-
-    run() {
-        this.g.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.update();
-        this.render();
-        requestAnimationFrame(() => {
-            this.run()
-        });
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = World;
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
-
-
-class Ball extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
-    constructor(x, y, vx = 5, vy = 5, r = 10) {
-        super();
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
-        this.ax = 0;
-        this.ay = 1;
-        this.r = r;
-        this.fill_color = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")";
-        this.shape = __WEBPACK_IMPORTED_MODULE_0__Body__["b" /* ShapeFactory */].create_circle(this.r);
-    };
-
-    update() {
-        super.update();
-        this.left = this.x - this.r;
-        this.right = this.x + this.r;
-        this.top = this.y - this.r;
-        this.down = this.y + this.r;
-    };
-
-    render(g) {
-        g.fillStyle = this.fill_color;
-        g.beginPath();
-        g.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-        g.fill();
-        g.closePath();
-    };
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Ball;
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-class Shape {
-    constructor() {
-        this.type = null;
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Shape;
-;
-
-class Rect extends Shape {
-    constructor(w, h) {
-        super();
-        this.type = "RECT";
-        this.w = w;
-        this.h = h;
-    }
-};
-
-class Circle extends Shape {
-    constructor(r) {
-        super();
-        this.type = "CIRCLE";
-        this.r = r;
-    }
-};
-
-class ShapeFactory {
-    static create_rect(w, h) {
-        return new Rect(w, h);
-    }
-
-    static create_circle(r) {
-        return new Circle(r);
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["b"] = ShapeFactory;
-;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
 
 
@@ -346,7 +118,6 @@ class Brick extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
         this.h = h;
         this.fill_color = c;
         this.shape = __WEBPACK_IMPORTED_MODULE_0__Body__["b" /* ShapeFactory */].create_rect(w, h);
-        this.is_static = true;
     };
 
     update() {
@@ -362,38 +133,7 @@ class Brick extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
 
 
 /***/ }),
-/* 6 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Brick__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EventTrigger__ = __webpack_require__(7);
-
-
-
-class Player extends __WEBPACK_IMPORTED_MODULE_0__Brick__["a" /* Brick */] {
-    constructor(x, y, w, h) {
-        super(x, y, w, h);
-        this.is_static = false;
-        this.event = new __WEBPACK_IMPORTED_MODULE_1__EventTrigger__["a" /* EventTrigger */]();
-    }
-
-    update() {
-        super.update();
-        this.ax = 0;
-        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].left)) {
-            this.ax = -0.1;
-        }
-        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].right)) {
-            this.ax = 0.1;
-        }
-    }
-}
-/* harmony export (immutable) */ __webpack_exports__["a"] = Player;
-
-
-/***/ }),
-/* 7 */
+/* 2 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -442,6 +182,293 @@ class EventTrigger {
     }
 }
 /* harmony export (immutable) */ __webpack_exports__["a"] = EventTrigger;
+
+
+/***/ }),
+/* 3 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__World__ = __webpack_require__(4);
+
+
+window.onload = function () {
+    let c = window.document.getElementById("c");
+    let h = 500, w = 1000;
+    c.setAttribute('width', w);
+    c.setAttribute('height', h);
+    let world = new __WEBPACK_IMPORTED_MODULE_0__World__["a" /* World */](c);
+    world.run();
+}
+
+/***/ }),
+/* 4 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Ball__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Brick__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Player__ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__EventTrigger__ = __webpack_require__(2);
+
+
+
+
+
+class World {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.w = this.canvas.width;
+        this.h = this.canvas.height;
+        this.g = this.canvas.getContext("2d");
+        this.event = new __WEBPACK_IMPORTED_MODULE_3__EventTrigger__["a" /* EventTrigger */]();
+        this.bc = document.createElement('canvas');
+        this.bc.width = this.w;
+        this.bc.height = this.h;
+        this.state = "play";
+        this.statics = Array();
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 4; j++) {
+                this.statics.push(new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](50 + i * 100, 50 + j * 30, 80, 20));
+            }
+        }
+        let wall_sz = 20;
+        let wall_up = new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](0, 0, wall_sz, this.h);
+        wall_up.is_static = true;
+        let wall_right = new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](this.w - wall_sz, 0, wall_sz, this.h, wall_up.fill_color);
+        wall_right.is_static = true;
+        let wall_left = new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, 0, this.w - wall_sz * 2, wall_sz, wall_up.fill_color);
+        wall_left.is_static = true;
+        let wall_down = new __WEBPACK_IMPORTED_MODULE_1__Brick__["a" /* Brick */](wall_sz, this.h - wall_sz, this.w - wall_sz * 2, wall_sz, wall_up.fill_color);
+        wall_down.is_static = true;
+        this.statics.push(wall_up);
+        this.statics.push(wall_right);
+        this.statics.push(wall_left);
+        // this.statics.push(wall_down);
+        this.player = new __WEBPACK_IMPORTED_MODULE_2__Player__["a" /* Player */](this.w / 2, this.h - 50, 150, 20);
+        this.ball = new __WEBPACK_IMPORTED_MODULE_0__Ball__["a" /* Ball */](this.player.x + this.player.w / 2, this.player.y - 40, Math.random() * 6 - 3, -5);
+    }
+
+    ball_hit_rect(a, b) {
+        if (a.x >= ( b.x - a.r) && a.x <= (b.x + b.w + a.r) &&
+            a.y >= (b.y - a.r) && a.y <= (b.y + b.h + a.r)) {
+            if (a.x >= b.x && a.x <= (b.x + b.w)) {
+                a.x -= a.vx;
+                a.y -= a.vy;
+                a.vy = -a.vy;
+            }
+            else {
+                a.x -= a.vx;
+                a.y -= a.vy;
+                a.vx = -a.vx;
+            }
+            return true;
+        }
+        return false;
+    }
+
+    rect_hit_rect(a, b) {
+        if (a.x > (b.x + b.w) || (a.x + a.w) < b.x)
+            return false;
+        if (a.y > ( b.y + b.h) || ( a.y + a.h) < b.y)
+            return false;
+        return true;
+    }
+
+    is_hit(a, b) {
+        return false;
+    }
+
+    hit_check() {
+        for (let i = 0; i < this.statics.length; i++) {
+            if (this.statics[i].is_visiable) {
+                if (this.ball_hit_rect(this.ball, this.statics[i])) {
+                    if (!this.statics[i].is_static) {
+                        this.statics[i].is_visiable = false;
+                    }
+                    return
+                }
+                if (this.rect_hit_rect(this.player, this.statics[i])) {
+                    this.player.x -= this.player.vx;
+                    this.player.vx = -this.player.vx;
+                }
+            }
+        }
+        if (this.ball_hit_rect(this.ball, this.player)) {
+
+        }
+    }
+
+    update() {
+        for (var b of this.statics) {
+            b.update();
+        }
+        this.player.update();
+        this.ball.update();
+        this.hit_check();
+        if (this.ball.y > this.canvas.height) {
+            this.state = "game_over";
+        }
+    }
+
+    draw_bg() {
+        this.g.fillStyle = "green";
+        this.g.fillText("KeyPress", this.w - 150, this.h - 50);
+        this.g.fillText("←", this.w - 100, this.h - 100);
+        this.g.fillText("↑", this.w - 80, this.h - 120);
+        this.g.fillText("→", this.w - 65, this.h - 100);
+        this.g.fillText("↓", this.w - 80, this.h - 80);
+    }
+
+    draw_over() {
+        this.g.fillStyle = "green";
+        this.g.fillText("GAME OVER", this.w / 2, this.h / 2);
+    }
+
+    render() {
+        switch (this.state) {
+            case"play":
+                this.draw_bg();
+                this.update();
+                for (var b of this.statics) {
+                    if (b.is_visiable) {
+                        b.render(this.g);
+                    }
+                }
+                this.player.render(this.g);
+                this.ball.render(this.g);
+                break;
+            case "game_over":
+                this.draw_over();
+                break;
+        }
+    }
+
+    run() {
+        this.g.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.render();
+        requestAnimationFrame(() => {
+            this.run()
+        });
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = World;
+
+
+/***/ }),
+/* 5 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Body__ = __webpack_require__(0);
+
+
+class Ball extends __WEBPACK_IMPORTED_MODULE_0__Body__["a" /* Body */] {
+    constructor(x, y, vx = 5, vy = 5, r = 20) {
+        super();
+        this.x = x;
+        this.y = y;
+        this.vx = vx;
+        this.vy = vy;
+        this.ax = 0;
+        this.ay = 0;
+        this.r = r;
+        this.fill_color = "rgba(" + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + parseInt(Math.random() * 255) + "," + 255 + ")";
+        this.shape = __WEBPACK_IMPORTED_MODULE_0__Body__["b" /* ShapeFactory */].create_circle(this.r);
+    };
+
+    update() {
+        super.update();
+        this.left = this.x - this.r;
+        this.right = this.x + this.r;
+        this.top = this.y - this.r;
+        this.down = this.y + this.r;
+    };
+
+    render(g) {
+        g.fillStyle = this.fill_color;
+        g.beginPath();
+        g.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        g.fill();
+        g.closePath();
+    };
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Ball;
+
+
+/***/ }),
+/* 6 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+class Shape {
+    constructor() {
+        this.type = null;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Shape;
+;
+
+class Rect extends Shape {
+    constructor(w, h) {
+        super();
+        this.type = "RECT";
+        this.w = w;
+        this.h = h;
+    }
+};
+
+class Circle extends Shape {
+    constructor(r) {
+        super();
+        this.type = "CIRCLE";
+        this.r = r;
+    }
+};
+
+class ShapeFactory {
+    static create_rect(w, h) {
+        return new Rect(w, h);
+    }
+
+    static create_circle(r) {
+        return new Circle(r);
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = ShapeFactory;
+;
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Brick__ = __webpack_require__(1);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__EventTrigger__ = __webpack_require__(2);
+
+
+
+class Player extends __WEBPACK_IMPORTED_MODULE_0__Brick__["a" /* Brick */] {
+    constructor(x, y, w, h) {
+        super(x, y, w, h);
+        this.is_static = false;
+        this.event = new __WEBPACK_IMPORTED_MODULE_1__EventTrigger__["a" /* EventTrigger */]();
+    }
+
+    update() {
+        super.update();
+        this.ax = 0;
+        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].left)) {
+            this.ax = -0.3;
+        }
+        if (this.event.is_keydown(__WEBPACK_IMPORTED_MODULE_1__EventTrigger__["b" /* KeyCode */].right)) {
+            this.ax = 0.3;
+        }
+        this.vx*=0.95;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = Player;
 
 
 /***/ })
